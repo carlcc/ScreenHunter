@@ -3,6 +3,8 @@
 //
 
 #include "editor/EditorWindow.h"
+#include "editor/ctrl/ColorButton.h"
+#include "editor/paint/IElementPainter.h"
 #include "event/KeyboardEvent.h"
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
@@ -11,18 +13,16 @@
 
 EditorWindow::EditorWindow()
 {
-    mButton1.setSize(100, 100);
-    mButton1.setPosition(100, 100);
-    mButton1.setFillColor(BLRgba32(0xff0000ff));
-    mButton1.setBorderColor(BLRgba32(0xffff0000));
-    mButton2.setSize(100, 100);
-    mButton2.setPosition(200, 100);
-    mButton2.setFillColor(BLRgba32(0xff00ff00));
-    mButton2.setBorderColor(BLRgba32(0x00ffff00));
-    mButton3.setSize(100, 100);
-    mButton3.setPosition(100, 200);
-    mButton3.setFillColor(BLRgba32(0x00ff00ff));
-    mButton3.setBorderColor(BLRgba32(0x0000ffff));
+    int i = 0;
+    mControls.push_back(std::make_shared<ColorPicker>());
+    mControls.push_back(std::make_shared<ToolPicker>());
+
+    mColorButtons = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
+    mToolButtons = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
+
+    mColorButtons->setPosition(100, 100);
+    mToolButtons->setPosition(300, 100);
+    mCurrentPainter = mToolButtons->newPaintTool();
 }
 
 EditorWindow::~EditorWindow()
@@ -36,13 +36,14 @@ void EditorWindow::paint()
     Painter painter(this);
     painter.clearAll();
     painter.setFillStyle(BLRgba32(0xff00ffff));
+    painter.setStrokeStyle(BLRgba32(mColorButtons->selectedColor()));
     painter.setStrokeWidth(4);
 
-    mButton1.paint(painter);
-    mButton2.paint(painter);
-    mButton3.paint(painter);
+    mPaintHistory.paint(painter);
 
-    std::cout << "Paint " << std::endl;
+    for (auto& c : mControls) {
+        c->paint(painter);
+    }
 }
 
 void EditorWindow::onWindowEvent(const WindowEvent& we)
@@ -52,6 +53,26 @@ void EditorWindow::onWindowEvent(const WindowEvent& we)
 
 void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 {
+    if (!mIsPainting) {
+        for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
+            auto pControl = *rit;
+            if (pControl->isInnerAbs(mbe.x, mbe.y)) {
+                pControl->onMouseButtonEvent(mbe);
+                repaint();
+                return;
+            }
+        }
+    }
+
+    mIsPainting = MouseButtonEvent::ADown == mbe.action;
+    if (mIsPainting) {
+        mCurrentPainter = mToolButtons->newPaintTool();
+        mCurrentPainter->onStart(mbe.x, mbe.y);
+        mPaintHistory.push(mCurrentPainter);
+        std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
+    } else {
+        mCurrentPainter->onEnd(mbe.x, mbe.y);
+    }
     repaint();
 }
 
@@ -65,5 +86,19 @@ void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 {
+    if (mIsPainting) {
+        mCurrentPainter->onDragging(mme.x, mme.y);
+        repaint();
+        return;
+    }
+
+    for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
+        auto pControl = *rit;
+        if (pControl->isInnerAbs(mme.x, mme.y)) {
+            pControl->onMouseMoveEvent(mme);
+            repaint();
+            return;
+        }
+    }
     repaint();
 }

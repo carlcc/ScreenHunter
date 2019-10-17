@@ -1,4 +1,5 @@
-#include "window/ctrl/Control.h"
+#pragma once
+#include "editor/ctrl/Control.h"
 #include <memory>
 #include <vector>
 
@@ -18,8 +19,15 @@ public:
 
     size_t childrenCount() const;
 
+
+protected:
     void paint(Painter& painter) override;
+    void onMouseButtonEvent(const MouseButtonEvent& mbe) override;
+    void onKeyboardEvent(const KeyboardEvent& ke) override;
+    void onMouseMoveEvent(const MouseMoveEvent& mme) override;
 
 protected:
     std::vector<ControlRef> mChildren;
+
+    friend class EditorWindow;
 };

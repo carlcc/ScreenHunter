@@ -1,7 +1,9 @@
 #pragma once
 
+#include "editor/ctrl/ColorPicker.h"
+#include "editor/ctrl/ToolPicker.h"
+#include "editor/paint/PaintHistory.h"
 #include "window/AppWindow.h"
-#include "window/ctrl/ColorButton.h"
 
 class EditorWindow : public AppWindow {
 public:
@@ -16,8 +18,11 @@ protected:
     void onMouseMoveEvent(const MouseMoveEvent& mme) override;
 
 private:
-    ColorButton mButton1;
-    ColorButton mButton2;
-    ColorButton mButton3;
+    std::vector<std::shared_ptr<Control>> mControls;
+    ColorPicker* mColorButtons;
+    ToolPicker* mToolButtons;
+    std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
+    PaintHistory mPaintHistory;
+    bool mIsPainting { false };
     friend class App;
 };

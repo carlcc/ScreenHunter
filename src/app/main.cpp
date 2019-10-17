@@ -98,6 +98,7 @@ int main(int argc, char** argv)
 {
     App app(argc, argv);
     auto win = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
+    auto win2 = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
 
     return app.exec();
 }

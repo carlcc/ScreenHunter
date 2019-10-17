@@ -51,6 +51,9 @@ void App::handleEvents()
         case SDL_WINDOWEVENT: {
             auto& e = event.window;
             auto* w = SDL_GetWindowFromID(e.windowID);
+            if (w == nullptr) {
+                break;
+            }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
             WindowEvent we;
             appWin->onWindowEvent(we);
@@ -60,6 +63,9 @@ void App::handleEvents()
         case SDL_MOUSEBUTTONDOWN: {
             auto& e = event.button;
             auto* w = SDL_GetWindowFromID(e.windowID);
+            if (w == nullptr) {
+                break;
+            }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
             MouseButtonEvent mbe {};
             mbe.x = e.x;
@@ -79,6 +85,9 @@ void App::handleEvents()
         case SDL_MOUSEMOTION: {
             auto& e = event.motion;
             auto* w = SDL_GetWindowFromID(e.windowID);
+            if (w == nullptr) {
+                break;
+            }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
             MouseMoveEvent mme {};
             mme.x = e.x;
@@ -92,6 +101,9 @@ void App::handleEvents()
         case SDL_KEYUP: {
             auto& e = event.key;
             auto* w = SDL_GetWindowFromID(e.windowID);
+            if (w == nullptr) {
+                break;
+            }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
             KeyboardEvent ke;
             appWin->onKeyboardEvent(ke);
