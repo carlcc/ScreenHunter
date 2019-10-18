@@ -2,6 +2,7 @@
 #include "event/KeyboardEvent.h"
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
+#include "event/TextInputEvent.h"
 #include "event/WindowEvent.h"
 #include "window/AppWindow.h"
 #include "window/AppWindowManager.h"
@@ -100,6 +101,10 @@ void App::handleEvents()
         case SDL_KEYDOWN:
         case SDL_KEYUP: {
             auto& e = event.key;
+            if (e.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                mIsRunning = false;
+                break;
+            }
             auto* w = SDL_GetWindowFromID(e.windowID);
             if (w == nullptr) {
                 break;
@@ -107,6 +112,23 @@ void App::handleEvents()
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
             KeyboardEvent ke;
             appWin->onKeyboardEvent(ke);
+            break;
+        }
+//        case SDL_TEXTEDITING: {
+//            auto& e = event.edit;
+//            std::cout << "Edit: " << e.text << std::endl;
+//            break;
+//        }
+        case SDL_TEXTINPUT: {
+            auto& e = event.text;
+            auto* w = SDL_GetWindowFromID(e.windowID);
+            if (w == nullptr) {
+                break;
+            }
+            auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
+            TextInputEvent tie{};
+            tie.text = e.text;
+            appWin->onTextInputEvent(tie);
             break;
         }
         default:

@@ -68,6 +68,10 @@ void AppWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 {
 }
 
+void AppWindow::onTextInputEvent(const TextInputEvent& tie)
+{
+}
+
 BLImage& AppWindow::windowBuffer()
 {
     return *mImpl->mTextureBuf;

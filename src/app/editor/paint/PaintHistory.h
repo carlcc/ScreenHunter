@@ -2,7 +2,7 @@
 #include <vector>
 
 class Painter;
-class IPaintStep;
+class PaintStep;
 
 class PaintHistory {
 public:
@@ -13,7 +13,7 @@ public:
 
     bool redo();
 
-    void push(const std::shared_ptr<IPaintStep>& step);
+    void push(const std::shared_ptr<PaintStep>& step);
 
     void paint(Painter& painter);
 
@@ -26,6 +26,6 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<IPaintStep>> mHistory;
+    std::vector<std::shared_ptr<PaintStep>> mHistory;
     size_t mHistorySize;
 };

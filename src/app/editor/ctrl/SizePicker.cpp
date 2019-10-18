@@ -1,43 +1,22 @@
-#include "editor/ctrl/ToolPicker.h"
+#include "SizePicker.h"
 #include "editor/ctrl/ToolButton.h"
-#include "editor/paint/CurvePainter.h"
-#include "editor/paint/EllipsePainter.h"
-#include "editor/paint/RectPainter.h"
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
 #include "window/Painter.h"
+#include <vector>
 
-class ToolPickerConst {
+class SizePickerConst {
 public:
-    static const std::vector<ToolPicker::ElementPainterCreator>& elementPainterCreators()
+    static const std::vector<int>& buttonSizes()
     {
-        static std::vector<ToolPicker::ElementPainterCreator> kCreators = {
-            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<CurvePainter>()); },
-            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<RectPainter>()); },
-            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<EllipsePainter>()); },
-            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<CurvePainter>()); },
+        const static std::vector<int> buttonsSizes = {
+            2, 4, 8, 16
         };
-        return kCreators;
-    }
-
-    static const std::vector<std::shared_ptr<Icon>>& icons()
-    {
-        static std::vector<std::shared_ptr<Icon>> kIcons = {
-            std::make_shared<TextIcon>(),
-            std::make_shared<RectIcon>(),
-            std::make_shared<EllipseIcon>(),
-            std::make_shared<PenIcon>(),
-        };
-        return kIcons;
-    }
-
-    static int num()
-    {
-        return int(elementPainterCreators().size());
+        return buttonsSizes;
     }
 };
 
-ToolPicker::ToolPicker()
+SizePicker::SizePicker()
 {
     const int kButtonGap = 10;
     const int kButtonWidth = 30;
@@ -47,18 +26,19 @@ ToolPicker::ToolPicker()
     const int kMarginLeft = 8;
     const int kMarginTop = 8;
 
-    const auto& icons = ToolPickerConst::icons();
-    int numButtons = int(icons.size());
+    const auto& icon = std::make_shared<FilledEllipseIcon>();
+    const auto& buttonSizes = SizePickerConst::buttonSizes();
+    const int numButtons = int(buttonSizes.size());
     for (auto i = 0; i < numButtons; ++i) {
         std::shared_ptr<ToolButton> btn = std::make_shared<ToolButton>();
 
         btn->setSize(kButtonWidth, kButtonWidth);
-        btn->setIconSize(kButtonWidth, kButtonWidth);
+        btn->setIconSize(buttonSizes[i], buttonSizes[i]);
         btn->setSelectedColor(BLRgba32(kSelectedColor));
         btn->setHoverColor(BLRgba32(kHoverColor));
         btn->setDefaultColor(BLRgba32(kDefaultColor));
         btn->setPosition(kMarginLeft + (kButtonWidth + kButtonGap) * i, kMarginTop);
-        btn->setIcon(icons[i]);
+        btn->setIcon(icon);
 
         auto ctl = std::static_pointer_cast<Control>(btn);
         addChild(ctl);
@@ -70,11 +50,16 @@ ToolPicker::ToolPicker()
     setSize((kButtonGap + kButtonWidth) * numButtons - kButtonGap + kMarginLeft * 2, (kButtonGap + kButtonWidth) - kButtonGap + kMarginTop * 2);
 }
 
-ToolPicker::~ToolPicker()
+SizePicker::~SizePicker()
 {
 }
 
-void ToolPicker::onMouseButtonEvent(const MouseButtonEvent& mbe)
+int SizePicker::selectedSize() const
+{
+    return SizePickerConst::buttonSizes()[mSelectedButton];
+}
+
+void SizePicker::onMouseButtonEvent(const MouseButtonEvent& mbe)
 {
     if (mbe.action == MouseButtonEvent::ADown) {
         int i = 0;
@@ -92,12 +77,12 @@ void ToolPicker::onMouseButtonEvent(const MouseButtonEvent& mbe)
     }
 }
 
-void ToolPicker::onKeyboardEvent(const KeyboardEvent& ke)
+void SizePicker::onKeyboardEvent(const KeyboardEvent& ke)
 {
     Container::onKeyboardEvent(ke);
 }
 
-void ToolPicker::onMouseMoveEvent(const MouseMoveEvent& mme)
+void SizePicker::onMouseMoveEvent(const MouseMoveEvent& mme)
 {
     for (auto& c : children()) {
         auto btn = std::static_pointer_cast<ToolButton>(c);
@@ -107,15 +92,11 @@ void ToolPicker::onMouseMoveEvent(const MouseMoveEvent& mme)
     }
 }
 
-void ToolPicker::paint(Painter& painter)
+void SizePicker::paint(Painter& painter)
 {
     if (visible()) {
         painter.setFillStyle(BLRgba32(uint32_t(0xff1234557)));
         painter.fillRoundRect(absX(), absY(), width(), height(), 5);
         Container::paint(painter);
     }
-}
-std::shared_ptr<IElementPainter> ToolPicker::newPaintTool()
-{
-    return ToolPickerConst::elementPainterCreators()[mSelectedButton]();
 }

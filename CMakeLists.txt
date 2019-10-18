@@ -23,10 +23,8 @@ foreach (proj ${EXAMPLE})
 endforeach (proj)
 
 if (APPLE)
-#    find_library(corefoundation_lib CoreFoundation REQUIRED)
-#    find_library(coremedia_lib CoreMedia REQUIRED)
-#    find_library(avfoundation_lib AVFoundation REQUIRED)
-#    find_library(coregraphics_lib CoreGraphics REQUIRED)
+    find_library(avfoundation_lib AVFoundation REQUIRED)
+    find_library(coregraphics_lib CoreGraphics REQUIRED)
     find_library(corevideo_lib CoreVideo REQUIRED)
     find_library(cocoa_lib Cocoa REQUIRED)
     find_library(iokit_lib IOKit REQUIRED)
@@ -34,6 +32,8 @@ if (APPLE)
     find_library(carbon Carbon REQUIRED)
     find_library(core_audio CoreAudio REQUIRED)
     find_library(audio_toolbox AudioToolbox REQUIRED)
+    find_library(coremedia_lib CoreMedia REQUIRED)
+
     set(
             SDL2_PLATFORM_DEPS
             ${corevideo_lib}
@@ -43,12 +43,22 @@ if (APPLE)
             ${carbon}
             ${core_audio}
             ${audio_toolbox}
+            ${coremedia_lib}
+            ${corefoundation_lib}
+            ${avfoundation_lib}
+            ${coregraphics_lib}
             iconv
     )
+    add_definitions("-DSCREEN_HUNTER_MACOS")
 endif()
 
 
 file(GLOB_RECURSE APP_SRC src/app/*)
 add_executable(ScreenShot ${APP_SRC})
 target_include_directories(ScreenShot PRIVATE 3rdparty/include src/app)
-target_link_libraries(ScreenShot blend2d SDL2 ${SDL2_PLATFORM_DEPS})
+target_link_libraries(ScreenShot blend2d screen_capture_lite SDL2 ${SDL2_PLATFORM_DEPS})
+
+
+add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)
+target_include_directories(TestScreenShotMac PRIVATE 3rdparty/include)
+target_link_libraries(TestScreenShotMac blend2d ${SDL2_PLATFORM_DEPS})

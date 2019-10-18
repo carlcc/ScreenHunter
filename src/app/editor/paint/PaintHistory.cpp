@@ -1,5 +1,5 @@
 #include "editor/paint/PaintHistory.h"
-#include "editor/paint/IPaintStep.h"
+#include "editor/paint/PaintStep.h"
 
 PaintHistory::PaintHistory()
     : mHistory()
@@ -27,7 +27,7 @@ bool PaintHistory::redo()
     return false;
 }
 
-void PaintHistory::push(const std::shared_ptr<IPaintStep>& step)
+void PaintHistory::push(const std::shared_ptr<PaintStep>& step)
 {
     mHistorySize += 1;
     mHistory.resize(mHistorySize);

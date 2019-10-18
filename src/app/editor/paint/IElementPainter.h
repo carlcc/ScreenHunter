@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor/IDragHandler.h"
-#include "editor/paint/IPaintStep.h"
+#include "editor/paint/PaintStep.h"
 
-class IElementPainter : public IPaintStep, public IDragHandler {
+class IElementPainter : public PaintStep, public IDragHandler {
 };

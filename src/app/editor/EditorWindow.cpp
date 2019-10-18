@@ -3,7 +3,9 @@
 //
 
 #include "editor/EditorWindow.h"
-#include "editor/ctrl/ColorButton.h"
+#include "editor/ctrl/ColorPicker.h"
+#include "editor/ctrl/SizePicker.h"
+#include "editor/ctrl/ToolPicker.h"
 #include "editor/paint/IElementPainter.h"
 #include "event/KeyboardEvent.h"
 #include "event/MouseButtonEvent.h"
@@ -16,13 +18,16 @@ EditorWindow::EditorWindow()
     int i = 0;
     mControls.push_back(std::make_shared<ColorPicker>());
     mControls.push_back(std::make_shared<ToolPicker>());
+    mControls.push_back(std::make_shared<SizePicker>());
 
-    mColorButtons = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
-    mToolButtons = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
+    mColorPicker = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
+    mToolPicker = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
+    mSizePicker = static_cast<SizePicker*>(mControls[i++].get()); // NOLINT
 
-    mColorButtons->setPosition(100, 100);
-    mToolButtons->setPosition(300, 100);
-    mCurrentPainter = mToolButtons->newPaintTool();
+    mColorPicker->setPosition(100, 100);
+    mToolPicker->setPosition(300, 100);
+    mSizePicker->setPosition(100, 300);
+    mCurrentPainter = mToolPicker->newPaintTool();
 }
 
 EditorWindow::~EditorWindow()
@@ -36,7 +41,7 @@ void EditorWindow::paint()
     Painter painter(this);
     painter.clearAll();
     painter.setFillStyle(BLRgba32(0xff00ffff));
-    painter.setStrokeStyle(BLRgba32(mColorButtons->selectedColor()));
+    painter.setStrokeStyle(BLRgba32(mColorPicker->selectedColor()));
     painter.setStrokeWidth(4);
 
     mPaintHistory.paint(painter);
@@ -66,7 +71,13 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 
     mIsPainting = MouseButtonEvent::ADown == mbe.action;
     if (mIsPainting) {
-        mCurrentPainter = mToolButtons->newPaintTool();
+        mCurrentPainter = mToolPicker->newPaintTool();
+        PaintStyle ps;
+        ps.strokeColor = mColorPicker->selectedColor();
+        ps.strokeWidth = mSizePicker->selectedSize();
+        ps.fillColor = mColorPicker->selectedColor();
+
+        mCurrentPainter->setPaintStyle(ps);
         mCurrentPainter->onStart(mbe.x, mbe.y);
         mPaintHistory.push(mCurrentPainter);
         std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
@@ -101,4 +112,9 @@ void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
         }
     }
     repaint();
+}
+
+void EditorWindow::onTextInputEvent(const TextInputEvent& tie)
+{
+    AppWindow::onTextInputEvent(tie);
 }

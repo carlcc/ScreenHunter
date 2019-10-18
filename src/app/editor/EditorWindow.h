@@ -1,9 +1,13 @@
 #pragma once
 
-#include "editor/ctrl/ColorPicker.h"
-#include "editor/ctrl/ToolPicker.h"
 #include "editor/paint/PaintHistory.h"
 #include "window/AppWindow.h"
+
+class Control;
+class ColorPicker;
+class ToolPicker;
+class SizePicker;
+class IElementPainter;
 
 class EditorWindow : public AppWindow {
 public:
@@ -16,11 +20,13 @@ protected:
     void onMouseButtonEvent(const MouseButtonEvent& mbe) override;
     void onKeyboardEvent(const KeyboardEvent& ke) override;
     void onMouseMoveEvent(const MouseMoveEvent& mme) override;
+    void onTextInputEvent(const TextInputEvent& tie) override;
 
 private:
     std::vector<std::shared_ptr<Control>> mControls;
-    ColorPicker* mColorButtons;
-    ToolPicker* mToolButtons;
+    ColorPicker* mColorPicker;
+    ToolPicker* mToolPicker;
+    SizePicker* mSizePicker;
     std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
     PaintHistory mPaintHistory;
     bool mIsPainting { false };

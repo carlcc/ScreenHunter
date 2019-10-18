@@ -67,6 +67,12 @@ public:
         mIcon = icon;
     }
 
+    void setIconSize(int w, int h)
+    {
+        mIconWidth = w;
+        mIconHeight = h;
+    }
+
 protected:
     void paint(Painter& painter) override;
 
@@ -77,4 +83,6 @@ public:
     BLRgba32 mHoverColor;
     bool mIsSelected { false };
     bool mIsHover { false };
+    int mIconWidth;
+    int mIconHeight;
 };

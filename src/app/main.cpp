@@ -92,13 +92,40 @@
 
 #include "editor/EditorWindow.h"
 #include "window/App.h"
+#include "screen/DisplayInfo.h"
 #include "window/AppWindowManager.h"
+#include <iostream>
+#include <chrono>
+
+int64_t steadyTimeMillis()
+{
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+}
 
 int main(int argc, char** argv)
 {
+    auto startTime = steadyTimeMillis();
+    auto screenInfos = DisplayInfo::getDisplayInfos();
+    auto endTime = steadyTimeMillis();
+    std::cout << "Capture takes: " << endTime - startTime << std::endl;
+
+    if (screenInfos.empty()) {
+        std::cout << "Not screen was captured" << std::endl;
+        return -1;
+    }
+    BLImageCodec codec;
+    codec.findByName("BMP");
+    screenInfos[0]->getScreenShot()->writeToFile("4.bmp", codec);
+
     App app(argc, argv);
-    auto win = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
-    auto win2 = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
+    std::vector<std::shared_ptr<AppWindow>> windows;
+    windows.reserve(screenInfos.size());
+
+    for (auto& si : screenInfos) {
+        auto win = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
+        windows.push_back(std::static_pointer_cast<AppWindow>(win));
+    }
 
     return app.exec();
 }

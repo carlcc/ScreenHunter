@@ -1,11 +1,12 @@
 #pragma once
-#include <string>
 #include <blend2d.h>
+#include <string>
 
 class WindowEvent;
 class MouseButtonEvent;
 class MouseMoveEvent;
 class KeyboardEvent;
+class TextInputEvent;
 
 class AppWindow {
 public:
@@ -36,6 +37,8 @@ protected:
     virtual void onKeyboardEvent(const KeyboardEvent& ke);
 
     virtual void onMouseMoveEvent(const MouseMoveEvent& mme);
+
+    virtual void onTextInputEvent(const TextInputEvent& tie);
 
 private:
     bool needRepaint() const;

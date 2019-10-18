@@ -9,5 +9,6 @@ void EllipsePainter::paint(Painter& p)
     double rx = std::abs((mStartX - mEndX) / 2.0);
     double ry = std::abs((mStartY - mEndY) / 2.0);
 
+    mPaintStyle.apply(p);
     p.strokeEllipse(cx, cy, rx, ry);
 }
