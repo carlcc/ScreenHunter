@@ -23,10 +23,10 @@ public:
     static const std::vector<std::shared_ptr<Icon>>& icons()
     {
         static std::vector<std::shared_ptr<Icon>> kIcons = {
-            std::make_shared<TextIcon>(),
+            std::make_shared<PenIcon>(),
             std::make_shared<RectIcon>(),
             std::make_shared<EllipseIcon>(),
-            std::make_shared<PenIcon>(),
+            std::make_shared<TextIcon>(),
         };
         return kIcons;
     }

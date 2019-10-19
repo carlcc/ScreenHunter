@@ -35,7 +35,7 @@ if (APPLE)
     find_library(coremedia_lib CoreMedia REQUIRED)
 
     set(
-            SDL2_PLATFORM_DEPS
+            PLATFORM_DEPS
             ${corevideo_lib}
             ${cocoa_lib}
             ${iokit_lib}
@@ -50,15 +50,42 @@ if (APPLE)
             iconv
     )
     add_definitions("-DSCREEN_HUNTER_MACOS")
+    file(GLOB PLATFORM_SRC_FILES src/app/screen/mac/*)
+elseif(UNIX)
+    set(
+            PLATFORM_DEPS
+            X11
+            pthread
+            dl
+            rt
+    )
+
+    add_definitions("-DSCREEN_HUNTER_X11")
+    file(GLOB PLATFORM_SRC_FILES src/app/screen/x11/*)
 endif()
 
 
-file(GLOB_RECURSE APP_SRC src/app/*)
-add_executable(ScreenShot ${APP_SRC})
+file(GLOB APP_SRC
+        src/app/*
+        src/app/editor/*
+        src/app/editor/ctrl/*
+        src/app/editor/ctrl/icon/*
+        src/app/editor/paint/*
+        src/app/event/*
+        src/app/screen/*
+        src/app/window/*
+)
+
+add_executable(ScreenShot ${APP_SRC} ${PLATFORM_SRC_FILES})
 target_include_directories(ScreenShot PRIVATE 3rdparty/include src/app)
-target_link_libraries(ScreenShot blend2d screen_capture_lite SDL2 ${SDL2_PLATFORM_DEPS})
+target_link_libraries(ScreenShot blend2d SDL2 ${PLATFORM_DEPS})
 
 
 add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)
 target_include_directories(TestScreenShotMac PRIVATE 3rdparty/include)
-target_link_libraries(TestScreenShotMac blend2d ${SDL2_PLATFORM_DEPS})
+target_link_libraries(TestScreenShotMac blend2d ${PLATFORM_DEPS})
+
+
+add_executable(TestScreenShotLinux src/test/screenshot_linux.cpp)
+target_include_directories(TestScreenShotLinux PRIVATE 3rdparty/include)
+target_link_libraries(TestScreenShotLinux blend2d ${PLATFORM_DEPS})

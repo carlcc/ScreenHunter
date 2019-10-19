@@ -30,9 +30,7 @@ EditorWindow::EditorWindow()
     mCurrentPainter = mToolPicker->newPaintTool();
 }
 
-EditorWindow::~EditorWindow()
-{
-}
+EditorWindow::~EditorWindow() = default;
 
 void EditorWindow::paint()
 {
@@ -40,9 +38,10 @@ void EditorWindow::paint()
 
     Painter painter(this);
     painter.clearAll();
-    painter.setFillStyle(BLRgba32(0xff00ffff));
-    painter.setStrokeStyle(BLRgba32(mColorPicker->selectedColor()));
-    painter.setStrokeWidth(4);
+
+    if (mImageToEdit != nullptr) {
+        painter.blitImage(BLPointI(0, 0), *mImageToEdit);
+    }
 
     mPaintHistory.paint(painter);
 
@@ -53,7 +52,7 @@ void EditorWindow::paint()
 
 void EditorWindow::onWindowEvent(const WindowEvent& we)
 {
-    AppWindow::onWindowEvent(we);
+    repaint();
 }
 
 void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
@@ -117,4 +116,9 @@ void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 void EditorWindow::onTextInputEvent(const TextInputEvent& tie)
 {
     AppWindow::onTextInputEvent(tie);
+}
+
+void EditorWindow::setImage(const std::shared_ptr<BLImage>& img)
+{
+    mImageToEdit = img;
 }

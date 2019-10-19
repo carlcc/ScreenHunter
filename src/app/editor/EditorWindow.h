@@ -2,6 +2,7 @@
 
 #include "editor/paint/PaintHistory.h"
 #include "window/AppWindow.h"
+#include <memory>
 
 class Control;
 class ColorPicker;
@@ -13,6 +14,8 @@ class EditorWindow : public AppWindow {
 public:
     EditorWindow();
     ~EditorWindow();
+
+    void setImage(const std::shared_ptr<BLImage>& img);
 
 protected:
     void paint() override;
@@ -30,5 +33,7 @@ private:
     std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
     PaintHistory mPaintHistory;
     bool mIsPainting { false };
+
+    std::shared_ptr<BLImage> mImageToEdit;
     friend class App;
 };

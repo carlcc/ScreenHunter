@@ -56,7 +56,9 @@ void App::handleEvents()
                 break;
             }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
-            WindowEvent we;
+            WindowEvent we {};
+            we.data1 = e.data1;
+            we.data2 = e.data2;
             appWin->onWindowEvent(we);
             break;
         }
@@ -114,11 +116,11 @@ void App::handleEvents()
             appWin->onKeyboardEvent(ke);
             break;
         }
-//        case SDL_TEXTEDITING: {
-//            auto& e = event.edit;
-//            std::cout << "Edit: " << e.text << std::endl;
-//            break;
-//        }
+            //        case SDL_TEXTEDITING: {
+            //            auto& e = event.edit;
+            //            std::cout << "Edit: " << e.text << std::endl;
+            //            break;
+            //        }
         case SDL_TEXTINPUT: {
             auto& e = event.text;
             auto* w = SDL_GetWindowFromID(e.windowID);
@@ -126,7 +128,7 @@ void App::handleEvents()
                 break;
             }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
-            TextInputEvent tie{};
+            TextInputEvent tie {};
             tie.text = e.text;
             appWin->onTextInputEvent(tie);
             break;

@@ -31,9 +31,9 @@ const std::set<AppWindow*>& AppWindowManager::allWindows() const
     return mImpl->mWindows;
 }
 
-std::shared_ptr<AppWindow> AppWindowManager::registerWindow(AppWindow* win, const std::string& title, int w, int h)
+std::shared_ptr<AppWindow> AppWindowManager::registerWindow(AppWindow* win, const std::string& title, int x, int y, int w, int h)
 {
-    if (!win->initialize(title.c_str(), w, h)) {
+    if (!win->initialize(title.c_str(), x, y, w, h)) {
         return nullptr;
     }
 

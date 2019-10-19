@@ -10,7 +10,7 @@ public:
     Impl();
     ~Impl();
 
-    bool init(const char* title, int w, int h, AppWindow* _this);
+    bool init(const char* title, int x, int y, int w, int h, AppWindow* _this);
 
     void onPaint();
 
@@ -29,8 +29,6 @@ public:
     std::shared_ptr<SDL_Texture> mTexture;
 
     std::shared_ptr<BLImage> mTextureBuf;
-    int mWidth;
-    int mHeight;
 
     bool mNeedRepaint { true };
 };

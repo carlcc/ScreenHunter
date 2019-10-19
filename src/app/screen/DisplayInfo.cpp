@@ -4,6 +4,11 @@
 #include "screen/mac/DisplayInfoImpl.h"
 #endif
 
+#ifdef SCREEN_HUNTER_X11
+#include "screen/x11/DisplayInfoImpl.h"
+#endif
+
+
 DisplayInfo::~DisplayInfo()
 {
     delete mImpl;

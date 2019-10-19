@@ -5,8 +5,6 @@ AppWindow::Impl::Impl()
     : mSDLWindow(nullptr)
     , mRenderer(nullptr)
     , mTexture(nullptr)
-    , mWidth(600)
-    , mHeight(400)
 {
 }
 
@@ -14,15 +12,14 @@ AppWindow::Impl::~Impl()
 {
 }
 
-bool AppWindow::Impl::init(const char* title, int w, int h, AppWindow* _this)
+bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWindow* _this)
 {
-    auto* window = SDL_CreateWindow(title, 100, 100, w, h, 0);
+    auto* window = SDL_CreateWindow(title, x, y, w, h, 0);
     if (window == nullptr) {
         return false;
     }
 
     SDL_SetWindowData(window, "app_win", _this);
-    SDL_SetWindowData(window, "app_win_imp", this);
     mSDLWindow = std::shared_ptr<SDL_Window>(window, [](auto* p) {
         SDL_DestroyWindow(p);
     });
@@ -39,17 +36,16 @@ bool AppWindow::Impl::init(const char* title, int w, int h, AppWindow* _this)
     bmask = 0x0000FF00;
     amask = 0x000000FF;
 
-    auto* img = new BLImage(mWidth, mHeight, BL_FORMAT_PRGB32);
+    auto* img = new BLImage(w, h, BL_FORMAT_PRGB32);
     mTextureBuf = std::shared_ptr<BLImage>(img);
     BLImageData imgInfo {};
     mTextureBuf->getData(&imgInfo);
 
-    //创建一个RGB Surface
     SDL_Surface* pTmpSurface = SDL_CreateRGBSurfaceFrom(imgInfo.pixelData, w, h, 4 * 8, imgInfo.stride, rmask, gmask, bmask, amask);
     std::cout << SDL_GetError() << std::endl;
     if (nullptr == pTmpSurface)
         return false;
-    //创建Texture
+
     auto* texture = SDL_CreateTextureFromSurface(renderer, pTmpSurface);
 
     SDL_FreeSurface(pTmpSurface);

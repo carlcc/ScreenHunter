@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 class Painter;
@@ -17,11 +18,13 @@ public:
 
     void paint(Painter& painter);
 
-    size_t totalSize() const {
+    size_t totalSize() const
+    {
         return mHistory.size();
     }
 
-    size_t effectiveSize() const {
+    size_t effectiveSize() const
+    {
         return mHistorySize;
     }
 

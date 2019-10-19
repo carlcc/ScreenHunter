@@ -91,11 +91,11 @@
 //}
 
 #include "editor/EditorWindow.h"
-#include "window/App.h"
 #include "screen/DisplayInfo.h"
+#include "window/App.h"
 #include "window/AppWindowManager.h"
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
 int64_t steadyTimeMillis()
 {
@@ -116,14 +116,27 @@ int main(int argc, char** argv)
     }
     BLImageCodec codec;
     codec.findByName("BMP");
-    screenInfos[0]->getScreenShot()->writeToFile("4.bmp", codec);
 
     App app(argc, argv);
+    std::vector<std::shared_ptr<BLImage>> images;
     std::vector<std::shared_ptr<AppWindow>> windows;
+    images.reserve(screenInfos.size());
     windows.reserve(screenInfos.size());
 
     for (auto& si : screenInfos) {
-        auto win = AppWindowManager::get().createWindow<EditorWindow>("Main", 600, 400);
+        images.push_back(si->getScreenShot());
+    }
+
+    for (size_t i = 0; i < screenInfos.size(); ++i) {
+        auto& si = screenInfos[i];
+        auto& bounds = si->displayBounds();
+
+        int x = int(bounds.x);
+        int y = int(bounds.y);
+        int w = int(bounds.width);
+        int h = int(bounds.height);
+        auto win = AppWindowManager::get().createWindow<EditorWindow>("Main", x, y, w, h);
+        win->setImage(images[i]);
         windows.push_back(std::static_pointer_cast<AppWindow>(win));
     }
 

@@ -27,9 +27,9 @@ void AppWindow::onPaint()
     mImpl->onPaint();
 }
 
-bool AppWindow::initialize(const char* title, int w, int h)
+bool AppWindow::initialize(const char* title, int x, int y, int w, int h)
 {
-    return mImpl->init(title, w, h, this);
+    return mImpl->init(title, x, y, w, h, this);
 }
 
 bool AppWindow::needRepaint() const
@@ -80,4 +80,13 @@ BLImage& AppWindow::windowBuffer()
 const BLImage& AppWindow::windowBuffer() const
 {
     return *mImpl->mTextureBuf;
+}
+int AppWindow::width() const
+{
+    return mImpl->width();
+}
+
+int AppWindow::height() const
+{
+    return mImpl->height();
 }

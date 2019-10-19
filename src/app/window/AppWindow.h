@@ -16,6 +16,10 @@ public:
 
     void resize(int w, int h);
 
+    int width() const;
+
+    int height() const;
+
     void repaint();
 
     BLImage& windowBuffer();
@@ -43,7 +47,7 @@ protected:
 private:
     bool needRepaint() const;
 
-    bool initialize(const char* title, int w, int h);
+    bool initialize(const char* title, int x, int y, int w, int h);
 
     class Impl;
     Impl* mImpl;
