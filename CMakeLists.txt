@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(PlayBlend2D)
+project(ScreenHunter)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(BLEND2D_STATIC ON)
+set(SDL_SHARED OFF)
+add_subdirectory(3rdparty/SDL2-2.0.8)
+add_subdirectory(3rdparty/blend2d)
 
 file(GLOB EXAMPLE src/example/*)
 file(GLOB EXAMPLE_PATH src/example)
-
-link_directories(
-        3rdparty/lib
-)
-
 
 foreach (proj ${EXAMPLE})
     file(GLOB_RECURSE proj_src ${proj}/*)
@@ -22,7 +21,24 @@ foreach (proj ${EXAMPLE})
     target_link_libraries(${out_name} blend2d)
 endforeach (proj)
 
-if (APPLE)
+if (WIN32)
+    set(
+            PLATFORM_DEPS
+            SDL2-static
+            user32
+            gdi32
+            winmm
+            imm32
+            ole32
+            oleaut32
+            version
+            uuid
+            dinput8
+    )
+
+    add_definitions("-DSCREEN_HUNTER_WIN32")
+    file(GLOB PLATFORM_SRC_FILES src/app/screen/win32/*)
+elseif(APPLE)
     find_library(avfoundation_lib AVFoundation REQUIRED)
     find_library(coregraphics_lib CoreGraphics REQUIRED)
     find_library(corevideo_lib CoreVideo REQUIRED)
@@ -36,6 +52,7 @@ if (APPLE)
 
     set(
             PLATFORM_DEPS
+            SDL2
             ${corevideo_lib}
             ${cocoa_lib}
             ${iokit_lib}
@@ -54,6 +71,7 @@ if (APPLE)
 elseif(UNIX)
     set(
             PLATFORM_DEPS
+            SDL2
             X11
             pthread
             dl
@@ -78,8 +96,9 @@ file(GLOB APP_SRC
 
 add_executable(ScreenShot ${APP_SRC} ${PLATFORM_SRC_FILES})
 target_include_directories(ScreenShot PRIVATE 3rdparty/include src/app)
-target_link_libraries(ScreenShot blend2d SDL2 ${PLATFORM_DEPS})
+target_link_libraries(ScreenShot blend2d ${PLATFORM_DEPS})
 
+add_dependencies(ScreenShot blend2d SDL2-static)
 
 add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)
 target_include_directories(TestScreenShotMac PRIVATE 3rdparty/include)
@@ -89,3 +108,8 @@ target_link_libraries(TestScreenShotMac blend2d ${PLATFORM_DEPS})
 add_executable(TestScreenShotLinux src/test/screenshot_linux.cpp)
 target_include_directories(TestScreenShotLinux PRIVATE 3rdparty/include)
 target_link_libraries(TestScreenShotLinux blend2d ${PLATFORM_DEPS})
+
+
+add_executable(TestScreenShotWindows src/test/screenshot_windows.cpp)
+target_include_directories(TestScreenShotWindows PRIVATE 3rdparty/include)
+target_link_libraries(TestScreenShotWindows blend2d ${PLATFORM_DEPS})

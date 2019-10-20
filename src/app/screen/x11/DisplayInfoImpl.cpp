@@ -1,4 +1,4 @@
-#include "DisplayInfoImpl.h"
+#include "screen/x11/DisplayInfoImpl.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <blend2d.h>

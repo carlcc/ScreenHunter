@@ -41,7 +41,7 @@ bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWin
     BLImageData imgInfo {};
     mTextureBuf->getData(&imgInfo);
 
-    SDL_Surface* pTmpSurface = SDL_CreateRGBSurfaceFrom(imgInfo.pixelData, w, h, 4 * 8, imgInfo.stride, rmask, gmask, bmask, amask);
+    SDL_Surface* pTmpSurface = SDL_CreateRGBSurfaceFrom(imgInfo.pixelData, w, h, 4 * 8, int(imgInfo.stride), rmask, gmask, bmask, amask);
     std::cout << SDL_GetError() << std::endl;
     if (nullptr == pTmpSurface)
         return false;

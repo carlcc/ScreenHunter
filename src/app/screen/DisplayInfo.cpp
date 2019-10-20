@@ -8,6 +8,10 @@
 #include "screen/x11/DisplayInfoImpl.h"
 #endif
 
+#ifdef SCREEN_HUNTER_WIN32
+#include "screen/win32/DisplayInfoImpl.h"
+#endif
+
 
 DisplayInfo::~DisplayInfo()
 {
