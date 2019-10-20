@@ -105,17 +105,12 @@ int64_t steadyTimeMillis()
 
 int main(int argc, char** argv)
 {
-    auto startTime = steadyTimeMillis();
     auto screenInfos = DisplayInfo::getDisplayInfos();
-    auto endTime = steadyTimeMillis();
-    std::cout << "Capture takes: " << endTime - startTime << std::endl;
 
     if (screenInfos.empty()) {
         std::cout << "Not screen was captured" << std::endl;
         return -1;
     }
-    BLImageCodec codec;
-    codec.findByName("BMP");
 
     App app(argc, argv);
     std::vector<std::shared_ptr<BLImage>> images;
@@ -123,9 +118,12 @@ int main(int argc, char** argv)
     images.reserve(screenInfos.size());
     windows.reserve(screenInfos.size());
 
+    auto startTime = steadyTimeMillis();
     for (auto& si : screenInfos) {
         images.push_back(si->getScreenShot());
     }
+    auto endTime = steadyTimeMillis();
+    std::cout << "Capture takes: " << endTime - startTime << std::endl;
 
     for (size_t i = 0; i < screenInfos.size(); ++i) {
         auto& si = screenInfos[i];
