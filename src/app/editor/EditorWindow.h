@@ -33,6 +33,7 @@ private:
     std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
     PaintHistory mPaintHistory;
     bool mIsPainting { false };
+    bool mPaintControls { true };
 
     std::shared_ptr<BLImage> mImageToEdit;
     friend class App;

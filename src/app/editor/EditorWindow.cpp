@@ -34,8 +34,6 @@ EditorWindow::~EditorWindow() = default;
 
 void EditorWindow::paint()
 {
-    AppWindow::paint();
-
     Painter painter(this);
     painter.clearAll();
 
@@ -45,8 +43,10 @@ void EditorWindow::paint()
 
     mPaintHistory.paint(painter);
 
-    for (auto& c : mControls) {
-        c->paint(painter);
+    if (mPaintControls) {
+        for (auto& c : mControls) {
+            c->paint(painter);
+        }
     }
 }
 
@@ -89,9 +89,12 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 {
     AppWindow::onKeyboardEvent(ke);
+    mPaintControls = false;
+    paint();
     BLImageCodec codec;
     codec.findByName("BMP");
     windowBuffer().writeToFile("a.bmp", codec);
+    mPaintControls = true;
 }
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
