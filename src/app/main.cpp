@@ -96,6 +96,9 @@
 #include "window/AppWindowManager.h"
 #include <chrono>
 #include <iostream>
+#ifdef SCREEN_HUNTER_WIN32
+#include <Windows.h>
+#endif
 
 int64_t steadyTimeMillis()
 {
@@ -113,6 +116,12 @@ int main(int argc, char** argv)
     }
 
     App app(argc, argv);
+
+#ifdef SCREEN_HUNTER_WIN32
+    HWND windowHandle = GetConsoleWindow();
+    ShowWindow(windowHandle, SW_HIDE);
+#endif
+
     std::vector<std::shared_ptr<BLImage>> images;
     std::vector<std::shared_ptr<AppWindow>> windows;
     images.reserve(screenInfos.size());
