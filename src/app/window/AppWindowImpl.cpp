@@ -14,7 +14,7 @@ AppWindow::Impl::~Impl()
 
 bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWindow* _this)
 {
-    auto* window = SDL_CreateWindow(title, x, y, w, h, 0);
+    auto* window = SDL_CreateWindow(title, x, y, w, h, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_ALWAYS_ON_TOP);
     if (window == nullptr) {
         return false;
     }

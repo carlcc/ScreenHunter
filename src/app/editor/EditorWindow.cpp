@@ -38,7 +38,7 @@ void EditorWindow::paint()
     painter.clearAll();
 
     if (mImageToEdit != nullptr) {
-        painter.blitImage(BLPointI(0, 0), *mImageToEdit);
+        painter.blitImage(BLRectI(0,0, width(), height()), *mImageToEdit, BLRectI(0,0, mImageToEdit->width(), mImageToEdit->height()));
     }
 
     mPaintHistory.paint(painter);
