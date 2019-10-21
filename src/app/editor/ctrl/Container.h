@@ -19,6 +19,8 @@ public:
 
     size_t childrenCount() const;
 
+    void markCoordDirty() override;
+
 
 protected:
     void paint(Painter& painter) override;

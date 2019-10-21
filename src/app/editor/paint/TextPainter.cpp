@@ -49,7 +49,6 @@ void TextPainter::paint(Painter& painter)
     painter.setStrokeWidth(1);
     painter.setStrokeStyle(BLRgba32(0xFFFF0000));
 
-    painter.clipToRect(mStartX, mStartY, mEndX - mStartX + 1, mEndY - mStartY + 1);
     if (mDrawRect) {
         painter.strokeRect(mStartX, mStartY, mEndX - mStartX + 1, mEndY - mStartY + 1);
     }
@@ -78,7 +77,6 @@ void TextPainter::paint(Painter& painter)
             text = end + 1;
         }
     }
-    painter.restoreClipping();
 }
 
 void TextPainter::onKey(bool isDown, ScanCode scanCode)

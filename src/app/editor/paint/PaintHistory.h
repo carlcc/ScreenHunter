@@ -18,6 +18,11 @@ public:
 
     void paint(Painter& painter);
 
+    void clear() {
+        mHistory.clear();
+        mHistorySize = 0;
+    }
+
     size_t totalSize() const
     {
         return mHistory.size();

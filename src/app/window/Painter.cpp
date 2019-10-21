@@ -10,5 +10,8 @@ Painter::Painter(AppWindow* w)
     : BLContext(w->windowBuffer())
 {
 }
+Painter::Painter(const Painter& p): BLContext(p)
+{
+}
 
 Painter::~Painter() = default;

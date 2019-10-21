@@ -7,9 +7,6 @@ public:
     void onText(const std::string& text) override;
     void paint(Painter& p) override;
     void endProcess() override;
-
-private:
-public:
     void onKey(bool isDown, ScanCode scanCode) override;
 
 private:

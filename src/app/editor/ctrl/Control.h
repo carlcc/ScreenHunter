@@ -33,7 +33,7 @@ public:
     {
         mX = x;
         mY = y;
-        mIsAbsCoordDirty = true;
+        markCoordDirty();
     }
 
     int width() const
@@ -92,6 +92,10 @@ public:
     bool isInnerAbs(int x, int y)
     {
         return x >= absX() && y >= absY() && x < absX() + width() && y < absY() + height();
+    }
+
+    virtual void markCoordDirty() {
+        mIsAbsCoordDirty = true;
     }
 
 protected:

@@ -22,12 +22,12 @@ EditorWindow::EditorWindow()
     mControls.push_back(std::make_shared<ColorPicker>());
     mControls.push_back(std::make_shared<ToolPicker>());
     mControls.push_back(std::make_shared<SizePicker>());
-    auto textBox = std::make_shared<TextBox>();
-    mControls.push_back(textBox);
-    textBox->setPosition(100, 100);
-    textBox->setFontSize(32);
-    textBox->setTextColor(BLRgba32(0xffff0000));
-    textBox->setText("Hello, world\nnice to meet you!");
+//    auto textBox = std::make_shared<TextBox>();
+//    mControls.push_back(textBox);
+//    textBox->setPosition(100, 100);
+//    textBox->setFontSize(32);
+//    textBox->setTextColor(BLRgba32(0xffff0000));
+//    textBox->setText("Hello, world\nnice to meet you!");
 
     mColorPicker = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
     mToolPicker = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
@@ -58,7 +58,7 @@ void EditorWindow::paint()
 
     mPaintHistory.paint(painter);
 
-    if (mPaintControls && mEditorState == ES_PAINTING_IDLE) {
+    if (mPaintControls && mEditorState != ES_CLIPPING_IDLE && mEditorState != ES_CLIPPING) {
         painter.restoreClipping();
         for (auto& c : mControls) {
             c->paint(painter);
@@ -73,47 +73,59 @@ void EditorWindow::onWindowEvent(const WindowEvent& we)
 
 void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 {
-    if (mEditorState == ES_CLIPPING_IDLE) {
-        // Select painting area
-        if (MouseButtonEvent::ADown == mbe.action) {
-            mClippingPainter = std::make_shared<ClippingPainter>(mImageToEdit);
-            setNewPaintTool(mClippingPainter);
-            mCurrentPainter->onStart(mbe.x, mbe.y);
-            mPaintHistory.push(mCurrentPainter);
-            mEditorState = ES_CLIPPING;
-        }
-    } else if (mEditorState == ES_CLIPPING) {
-        if (MouseButtonEvent::AUp == mbe.action) {
-            mCurrentPainter->onEnd(mbe.x, mbe.y);
-            setButtonsPosition();
-            mEditorState = ES_PAINTING_IDLE;
-        }
-    } else if (mEditorState == ES_PAINTING_IDLE) {
-        for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
-            auto pControl = *rit;
-            if (pControl->isInnerAbs(mbe.x, mbe.y)) {
-                pControl->onMouseButtonEvent(mbe);
-                repaint();
-                return;
+    if (mbe.button == MouseButtonEvent::BButtonLeft) {
+        if (mEditorState == ES_CLIPPING_IDLE) {
+            // Select painting area
+            if (MouseButtonEvent::ADown == mbe.action) {
+                mClippingPainter = std::make_shared<ClippingPainter>(mImageToEdit);
+                setNewPaintTool(mClippingPainter);
+                mCurrentPainter->onStart(mbe.x, mbe.y);
+                mPaintHistory.push(mCurrentPainter);
+                mEditorState = ES_CLIPPING;
+            }
+        } else if (mEditorState == ES_CLIPPING) {
+            if (MouseButtonEvent::AUp == mbe.action) {
+                mCurrentPainter->onEnd(mbe.x, mbe.y);
+                setButtonsPosition();
+                mEditorState = ES_PAINTING_IDLE;
+            }
+        } else if (mEditorState == ES_PAINTING_IDLE) {
+            for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
+                auto pControl = *rit;
+                if (pControl->isInnerAbs(mbe.x, mbe.y)) {
+                    pControl->onMouseButtonEvent(mbe);
+                    repaint();
+                    return;
+                }
+            }
+            if (MouseButtonEvent::ADown == mbe.action) {
+                mEditorState = ES_PAINTING;
+                setNewPaintTool(mToolPicker->newPaintTool());
+                PaintStyle ps;
+                ps.strokeColor = mColorPicker->selectedColor();
+                ps.strokeWidth = mSizePicker->selectedSize();
+                ps.fillColor = mColorPicker->selectedColor();
+
+                mCurrentPainter->setPaintStyle(ps);
+                mCurrentPainter->onStart(mbe.x, mbe.y);
+                mPaintHistory.push(mCurrentPainter);
+                std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
+            }
+        } else if (mEditorState == ES_PAINTING) {
+            if (MouseButtonEvent::AUp == mbe.action) {
+                mCurrentPainter->onEnd(mbe.x, mbe.y);
+                mEditorState = ES_PAINTING_IDLE;
             }
         }
-        if (MouseButtonEvent::ADown == mbe.action) {
-            mEditorState = ES_PAINTING;
-            setNewPaintTool(mToolPicker->newPaintTool());
-            PaintStyle ps;
-            ps.strokeColor = mColorPicker->selectedColor();
-            ps.strokeWidth = mSizePicker->selectedSize();
-            ps.fillColor = mColorPicker->selectedColor();
-
-            mCurrentPainter->setPaintStyle(ps);
-            mCurrentPainter->onStart(mbe.x, mbe.y);
-            mPaintHistory.push(mCurrentPainter);
-            std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
-        }
-    } else if (mEditorState == ES_PAINTING) {
-        if (MouseButtonEvent::AUp == mbe.action) {
-            mCurrentPainter->onEnd(mbe.x, mbe.y);
-            mEditorState = ES_PAINTING_IDLE;
+    } else if (mbe.button == MouseButtonEvent::BButtonRight) {
+        if (mbe.action == MouseButtonEvent::AUp) {
+            if (mEditorState == ES_CLIPPING_IDLE) {
+                // TODO gracefully exit
+                exit(0);
+            } else {
+                mEditorState = ES_CLIPPING_IDLE;
+                mPaintHistory.clear();
+            }
         }
     }
 

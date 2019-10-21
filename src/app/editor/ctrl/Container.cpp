@@ -88,3 +88,11 @@ void Container::onMouseMoveEvent(const MouseMoveEvent& mme)
         }
     }
 }
+
+void Container::markCoordDirty()
+{
+    mIsAbsCoordDirty = true;
+    for (auto& c : mChildren) {
+        c->markCoordDirty();
+    }
+}
