@@ -26,14 +26,21 @@ protected:
     void onTextInputEvent(const TextInputEvent& tie) override;
 
 private:
+    enum EditorState {
+        ES_CLIPPING,
+        ES_PAINTING_IDLE,
+        ES_PAINTING
+    };
     std::vector<std::shared_ptr<Control>> mControls;
     ColorPicker* mColorPicker;
     ToolPicker* mToolPicker;
     SizePicker* mSizePicker;
     std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
     PaintHistory mPaintHistory;
-    bool mIsPainting { false };
+    EditorState mEditorState { ES_CLIPPING };
     bool mPaintControls { true };
+
+    BLRectI mClippingArea;
 
     std::shared_ptr<BLImage> mImageToEdit;
     friend class App;

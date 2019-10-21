@@ -43,7 +43,7 @@ void EditorWindow::paint()
 
     mPaintHistory.paint(painter);
 
-    if (mPaintControls) {
+    if (mPaintControls && mEditorState == ES_PAINTING_IDLE) {
         for (auto& c : mControls) {
             c->paint(painter);
         }
@@ -57,7 +57,15 @@ void EditorWindow::onWindowEvent(const WindowEvent& we)
 
 void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 {
-    if (!mIsPainting) {
+    if (mEditorState == ES_CLIPPING) {
+        // TODO Select painting area
+        if (MouseButtonEvent::ADown == mbe.action) {
+
+        } else {
+
+        }
+        mEditorState = ES_PAINTING_IDLE;
+    } else if (mEditorState == ES_PAINTING_IDLE) {
         for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
             auto pControl = *rit;
             if (pControl->isInnerAbs(mbe.x, mbe.y)) {
@@ -66,23 +74,27 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
                 return;
             }
         }
+        if (MouseButtonEvent::ADown == mbe.action) {
+            mEditorState = ES_PAINTING;
+            mCurrentPainter = mToolPicker->newPaintTool();
+            PaintStyle ps;
+            ps.strokeColor = mColorPicker->selectedColor();
+            ps.strokeWidth = mSizePicker->selectedSize();
+            ps.fillColor = mColorPicker->selectedColor();
+
+            mCurrentPainter->setPaintStyle(ps);
+            mCurrentPainter->onStart(mbe.x, mbe.y);
+            mPaintHistory.push(mCurrentPainter);
+            std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
+        }
+    } else if (mEditorState == ES_PAINTING) {
+        if (MouseButtonEvent::AUp == mbe.action) {
+            mCurrentPainter->onEnd(mbe.x, mbe.y);
+            mEditorState = ES_PAINTING_IDLE;
+        }
     }
 
-    mIsPainting = MouseButtonEvent::ADown == mbe.action;
-    if (mIsPainting) {
-        mCurrentPainter = mToolPicker->newPaintTool();
-        PaintStyle ps;
-        ps.strokeColor = mColorPicker->selectedColor();
-        ps.strokeWidth = mSizePicker->selectedSize();
-        ps.fillColor = mColorPicker->selectedColor();
 
-        mCurrentPainter->setPaintStyle(ps);
-        mCurrentPainter->onStart(mbe.x, mbe.y);
-        mPaintHistory.push(mCurrentPainter);
-        std::cout << "paint history size: " << mPaintHistory.totalSize() << ", " << mPaintHistory.effectiveSize() << std::endl;
-    } else {
-        mCurrentPainter->onEnd(mbe.x, mbe.y);
-    }
     repaint();
 }
 
@@ -99,18 +111,20 @@ void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 {
-    if (mIsPainting) {
+    if (mEditorState == ES_PAINTING) {
         mCurrentPainter->onDragging(mme.x, mme.y);
         repaint();
         return;
     }
 
-    for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
-        auto pControl = *rit;
-        if (pControl->isInnerAbs(mme.x, mme.y)) {
-            pControl->onMouseMoveEvent(mme);
-            repaint();
-            return;
+    if (mEditorState == ES_PAINTING_IDLE) {
+        for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
+            auto pControl = *rit;
+            if (pControl->isInnerAbs(mme.x, mme.y)) {
+                pControl->onMouseMoveEvent(mme);
+                repaint();
+                return;
+            }
         }
     }
     repaint();

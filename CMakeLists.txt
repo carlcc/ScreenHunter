@@ -71,7 +71,7 @@ elseif(APPLE)
 elseif(UNIX)
     set(
             PLATFORM_DEPS
-            SDL2
+            SDL2-static
             X11
             pthread
             dl
@@ -97,19 +97,18 @@ file(GLOB APP_SRC
 add_executable(ScreenShot ${APP_SRC} ${PLATFORM_SRC_FILES})
 target_include_directories(ScreenShot PRIVATE 3rdparty/include src/app)
 target_link_libraries(ScreenShot blend2d ${PLATFORM_DEPS})
-
 add_dependencies(ScreenShot blend2d SDL2-static)
 
-add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)
-target_include_directories(TestScreenShotMac PRIVATE 3rdparty/include)
-target_link_libraries(TestScreenShotMac blend2d ${PLATFORM_DEPS})
-
-
-add_executable(TestScreenShotLinux src/test/screenshot_linux.cpp)
-target_include_directories(TestScreenShotLinux PRIVATE 3rdparty/include)
-target_link_libraries(TestScreenShotLinux blend2d ${PLATFORM_DEPS})
-
-
-add_executable(TestScreenShotWindows src/test/screenshot_windows.cpp)
-target_include_directories(TestScreenShotWindows PRIVATE 3rdparty/include)
-target_link_libraries(TestScreenShotWindows blend2d ${PLATFORM_DEPS})
+if (APPLE)
+    add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)
+    target_include_directories(TestScreenShotMac PRIVATE 3rdparty/include)
+    target_link_libraries(TestScreenShotMac blend2d ${PLATFORM_DEPS})
+elseif(UNIX)
+    add_executable(TestScreenShotLinux src/test/screenshot_linux.cpp)
+    target_include_directories(TestScreenShotLinux PRIVATE 3rdparty/include)
+    target_link_libraries(TestScreenShotLinux blend2d ${PLATFORM_DEPS})
+elseif(WIN32)
+    add_executable(TestScreenShotWindows src/test/screenshot_windows.cpp)
+    target_include_directories(TestScreenShotWindows PRIVATE 3rdparty/include)
+    target_link_libraries(TestScreenShotWindows blend2d ${PLATFORM_DEPS})
+endif()
