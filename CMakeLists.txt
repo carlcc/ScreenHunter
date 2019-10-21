@@ -52,7 +52,7 @@ elseif(APPLE)
 
     set(
             PLATFORM_DEPS
-            SDL2
+            SDL2-static
             ${corevideo_lib}
             ${cocoa_lib}
             ${iokit_lib}

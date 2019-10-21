@@ -40,12 +40,12 @@ public:
 ToolPicker::ToolPicker()
 {
     const int kButtonGap = 10;
-    const int kButtonWidth = 30;
+    const int kButtonWidth = 32;
     const uint32_t kSelectedColor = 0xff338080;
     const uint32_t kHoverColor = 0xff338080;
     const uint32_t kDefaultColor = 0xfff0f0f0;
-    const int kMarginLeft = 8;
-    const int kMarginTop = 8;
+    const int kMarginLeft = 10;
+    const int kMarginTop = 10;
 
     const auto& icons = ToolPickerConst::icons();
     int numButtons = int(icons.size());

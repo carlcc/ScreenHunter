@@ -6,6 +6,7 @@
 #include "editor/ctrl/ColorPicker.h"
 #include "editor/ctrl/SizePicker.h"
 #include "editor/ctrl/ToolPicker.h"
+#include "editor/paint/ClippingPainter.h"
 #include "editor/paint/IElementPainter.h"
 #include "event/KeyboardEvent.h"
 #include "event/MouseButtonEvent.h"
@@ -38,12 +39,19 @@ void EditorWindow::paint()
     painter.clearAll();
 
     if (mImageToEdit != nullptr) {
-        painter.blitImage(BLRectI(0,0, width(), height()), *mImageToEdit, BLRectI(0,0, mImageToEdit->width(), mImageToEdit->height()));
+        painter.blitImage(BLRectI(0, 0, width(), height()), *mImageToEdit, BLRectI(0, 0, mImageToEdit->width(), mImageToEdit->height()));
+        painter.setFillStyle(BLRgba32(0, 0, 0, 144));
+        painter.fillRect(BLRectI(0, 0, width(), height()));
     }
+
+    BLPattern pattern(*mImageToEdit);
+    pattern.scale(1.0 * width() / mImageToEdit->width(), 1.0 * height() / mImageToEdit->height());
+    painter.setFillStyle(pattern);
 
     mPaintHistory.paint(painter);
 
     if (mPaintControls && mEditorState == ES_PAINTING_IDLE) {
+        painter.restoreClipping();
         for (auto& c : mControls) {
             c->paint(painter);
         }
@@ -57,14 +65,21 @@ void EditorWindow::onWindowEvent(const WindowEvent& we)
 
 void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 {
-    if (mEditorState == ES_CLIPPING) {
-        // TODO Select painting area
+    if (mEditorState == ES_CLIPPING_IDLE) {
+        // Select painting area
         if (MouseButtonEvent::ADown == mbe.action) {
-
-        } else {
-
+            mClippingPainter = std::make_shared<ClippingPainter>(mImageToEdit);
+            mCurrentPainter = mClippingPainter;
+            mCurrentPainter->onStart(mbe.x, mbe.y);
+            mPaintHistory.push(mCurrentPainter);
+            mEditorState = ES_CLIPPING;
         }
-        mEditorState = ES_PAINTING_IDLE;
+    } else if (mEditorState == ES_CLIPPING) {
+        if (MouseButtonEvent::AUp == mbe.action) {
+            mCurrentPainter->onEnd(mbe.x, mbe.y);
+            setButtonsPosition();
+            mEditorState = ES_PAINTING_IDLE;
+        }
     } else if (mEditorState == ES_PAINTING_IDLE) {
         for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
             auto pControl = *rit;
@@ -94,7 +109,6 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
         }
     }
 
-
     repaint();
 }
 
@@ -111,6 +125,11 @@ void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 {
+    if (mEditorState == ES_CLIPPING) {
+        mCurrentPainter->onDragging(mme.x, mme.y);
+        repaint();
+        return;
+    }
     if (mEditorState == ES_PAINTING) {
         mCurrentPainter->onDragging(mme.x, mme.y);
         repaint();
@@ -138,4 +157,34 @@ void EditorWindow::onTextInputEvent(const TextInputEvent& tie)
 void EditorWindow::setImage(const std::shared_ptr<BLImage>& img)
 {
     mImageToEdit = img;
+}
+
+void EditorWindow::setButtonsPosition()
+{
+    const int kGap = 8;
+    int barHeight = mColorPicker->height();
+    int barWidth = mColorPicker->width() + mSizePicker->width() + mToolPicker->width() + kGap * 2;
+    int x = mClippingPainter->x();
+    int y = mClippingPainter->y();
+    int h = mClippingPainter->height();
+
+    if (x + barWidth > width()) {
+        x = width() - barWidth;
+    }
+    if (y + h + barHeight + kGap > height()) {
+        // try to figure out if we can put the bar on the top of the clipping area
+        if (y - kGap - barHeight < 0) {
+            // no
+            y = height() - barHeight;
+        } else {
+            // yes
+            y = y - kGap - barHeight;
+        }
+    } else {
+        y = y + h + kGap;
+    }
+
+    mColorPicker->setPosition(x, y);
+    mSizePicker->setPosition(x + mColorPicker->width() + kGap, y);
+    mToolPicker->setPosition(x + mColorPicker->width() + mSizePicker->width() + kGap * 2, y);
 }

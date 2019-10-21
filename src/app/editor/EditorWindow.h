@@ -9,6 +9,7 @@ class ColorPicker;
 class ToolPicker;
 class SizePicker;
 class IElementPainter;
+class ClippingPainter;
 
 class EditorWindow : public AppWindow {
 public:
@@ -26,7 +27,11 @@ protected:
     void onTextInputEvent(const TextInputEvent& tie) override;
 
 private:
+    void setButtonsPosition();
+
+private:
     enum EditorState {
+        ES_CLIPPING_IDLE,
         ES_CLIPPING,
         ES_PAINTING_IDLE,
         ES_PAINTING
@@ -37,10 +42,9 @@ private:
     SizePicker* mSizePicker;
     std::shared_ptr<IElementPainter> mCurrentPainter { nullptr };
     PaintHistory mPaintHistory;
-    EditorState mEditorState { ES_CLIPPING };
+    std::shared_ptr<ClippingPainter> mClippingPainter;
+    EditorState mEditorState { ES_CLIPPING_IDLE };
     bool mPaintControls { true };
-
-    BLRectI mClippingArea;
 
     std::shared_ptr<BLImage> mImageToEdit;
     friend class App;

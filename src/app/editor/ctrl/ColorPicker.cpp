@@ -16,7 +16,7 @@ ColorPicker::ColorPicker()
         0xffff00ff, //
         0xff00ffff,
     };
-    const int kButtonGap = 5;
+    const int kButtonGap = 4;
     const int kButtonWidth = 20;
     const uint32_t kSelectedBorderColor = 0xdddddddd;
     const uint32_t kHoverBorderColor = 0x7f7f7f7f;
