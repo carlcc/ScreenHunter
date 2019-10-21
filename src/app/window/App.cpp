@@ -34,7 +34,6 @@ int App::exec()
         handleEvents();
     }
 
-    //清理
     SDL_Quit();
     return 0;
 }
@@ -112,7 +111,9 @@ void App::handleEvents()
                 break;
             }
             auto* appWin = (AppWindow*)SDL_GetWindowData(w, "app_win");
-            KeyboardEvent ke;
+            KeyboardEvent ke {};
+            ke.action = e.type == SDL_KEYDOWN ? KeyboardEvent::ADown : KeyboardEvent::AUp;
+            ke.scanCode = ScanCode(e.keysym.scancode);
             appWin->onKeyboardEvent(ke);
             break;
         }
@@ -134,7 +135,7 @@ void App::handleEvents()
             break;
         }
         default:
-            //            std::cout << "Unhandled event " << event.type << std::endl;
+                        std::cout << "Unhandled event " << event.type << std::endl;
             break;
             // TODO
         }

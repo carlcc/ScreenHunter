@@ -29,6 +29,8 @@ protected:
 private:
     void setButtonsPosition();
 
+    void setNewPaintTool(const std::shared_ptr<IElementPainter>& newTool);
+
 private:
     enum EditorState {
         ES_CLIPPING_IDLE,

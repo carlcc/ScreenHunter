@@ -3,6 +3,7 @@
 #include "editor/paint/CurvePainter.h"
 #include "editor/paint/EllipsePainter.h"
 #include "editor/paint/RectPainter.h"
+#include "editor/paint/TextPainter.h"
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
 #include "window/Painter.h"
@@ -15,7 +16,7 @@ public:
             [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<CurvePainter>()); },
             [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<RectPainter>()); },
             [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<EllipsePainter>()); },
-            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<CurvePainter>()); },
+            [] { return std::static_pointer_cast<IElementPainter>(std::make_shared<TextPainter>()); },
         };
         return kCreators;
     }

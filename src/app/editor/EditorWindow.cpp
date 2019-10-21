@@ -5,6 +5,7 @@
 #include "editor/EditorWindow.h"
 #include "editor/ctrl/ColorPicker.h"
 #include "editor/ctrl/SizePicker.h"
+#include "editor/ctrl/TextBox.h"
 #include "editor/ctrl/ToolPicker.h"
 #include "editor/paint/ClippingPainter.h"
 #include "editor/paint/IElementPainter.h"
@@ -12,6 +13,7 @@
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
 #include "window/Painter.h"
+#include <event/TextInputEvent.h>
 #include <iostream>
 
 EditorWindow::EditorWindow()
@@ -20,6 +22,12 @@ EditorWindow::EditorWindow()
     mControls.push_back(std::make_shared<ColorPicker>());
     mControls.push_back(std::make_shared<ToolPicker>());
     mControls.push_back(std::make_shared<SizePicker>());
+    auto textBox = std::make_shared<TextBox>();
+    mControls.push_back(textBox);
+    textBox->setPosition(100, 100);
+    textBox->setFontSize(32);
+    textBox->setTextColor(BLRgba32(0xffff0000));
+    textBox->setText("Hello, world\nnice to meet you!");
 
     mColorPicker = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
     mToolPicker = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
@@ -28,7 +36,6 @@ EditorWindow::EditorWindow()
     mColorPicker->setPosition(100, 100);
     mToolPicker->setPosition(300, 100);
     mSizePicker->setPosition(100, 300);
-    mCurrentPainter = mToolPicker->newPaintTool();
 }
 
 EditorWindow::~EditorWindow() = default;
@@ -40,13 +47,14 @@ void EditorWindow::paint()
 
     if (mImageToEdit != nullptr) {
         painter.blitImage(BLRectI(0, 0, width(), height()), *mImageToEdit, BLRectI(0, 0, mImageToEdit->width(), mImageToEdit->height()));
-        painter.setFillStyle(BLRgba32(0, 0, 0, 144));
+        painter.setFillStyle(BLRgba32(0xA0000000));
         painter.fillRect(BLRectI(0, 0, width(), height()));
     }
 
     BLPattern pattern(*mImageToEdit);
     pattern.scale(1.0 * width() / mImageToEdit->width(), 1.0 * height() / mImageToEdit->height());
     painter.setFillStyle(pattern);
+    painter.setStrokeStyle(BLRgba32(0xFFFF0000));
 
     mPaintHistory.paint(painter);
 
@@ -69,7 +77,7 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
         // Select painting area
         if (MouseButtonEvent::ADown == mbe.action) {
             mClippingPainter = std::make_shared<ClippingPainter>(mImageToEdit);
-            mCurrentPainter = mClippingPainter;
+            setNewPaintTool(mClippingPainter);
             mCurrentPainter->onStart(mbe.x, mbe.y);
             mPaintHistory.push(mCurrentPainter);
             mEditorState = ES_CLIPPING;
@@ -91,7 +99,7 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
         }
         if (MouseButtonEvent::ADown == mbe.action) {
             mEditorState = ES_PAINTING;
-            mCurrentPainter = mToolPicker->newPaintTool();
+            setNewPaintTool(mToolPicker->newPaintTool());
             PaintStyle ps;
             ps.strokeColor = mColorPicker->selectedColor();
             ps.strokeWidth = mSizePicker->selectedSize();
@@ -114,13 +122,13 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 
 void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 {
-    AppWindow::onKeyboardEvent(ke);
-    mPaintControls = false;
-    paint();
-    BLImageCodec codec;
-    codec.findByName("BMP");
-    windowBuffer().writeToFile("a.bmp", codec);
-    mPaintControls = true;
+    mCurrentPainter->onKey(ke.action == KeyboardEvent::ADown, ke.scanCode);
+//    mPaintControls = false;
+//    paint();
+//    BLImageCodec codec;
+//    codec.findByName("BMP");
+//    windowBuffer().writeToFile("a.bmp", codec);
+//    mPaintControls = true;
 }
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
@@ -151,7 +159,9 @@ void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 
 void EditorWindow::onTextInputEvent(const TextInputEvent& tie)
 {
-    AppWindow::onTextInputEvent(tie);
+//    AppWindow::onTextInputEvent(tie);
+    mCurrentPainter->onText(tie.text);
+    repaint();
 }
 
 void EditorWindow::setImage(const std::shared_ptr<BLImage>& img)
@@ -187,4 +197,11 @@ void EditorWindow::setButtonsPosition()
     mColorPicker->setPosition(x, y);
     mSizePicker->setPosition(x + mColorPicker->width() + kGap, y);
     mToolPicker->setPosition(x + mColorPicker->width() + mSizePicker->width() + kGap * 2, y);
+}
+void EditorWindow::setNewPaintTool(const std::shared_ptr<IElementPainter>& newTool)
+{
+    if (mCurrentPainter != nullptr) {
+        mCurrentPainter->endProcess();
+    }
+    mCurrentPainter = newTool;
 }

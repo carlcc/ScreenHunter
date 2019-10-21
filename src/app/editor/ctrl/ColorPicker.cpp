@@ -7,11 +7,11 @@
 ColorPicker::ColorPicker()
 {
     const uint32_t colors[] = {
-        0xff000000, // black
-        0xffffffff, // white
         0xffff0000, // red
         0xff00ff00, // green
         0xff0000ff, // blue
+        0xff000000, // black
+        0xffffffff, // white
         0xffffff00, //
         0xffff00ff, //
         0xff00ffff,

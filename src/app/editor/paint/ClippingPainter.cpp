@@ -8,5 +8,6 @@ ClippingPainter::ClippingPainter(const std::shared_ptr<BLImage>& img): mImage(im
 void ClippingPainter::paint(Painter& p)
 {
     p.fillRect(mStartX, mStartY, mEndX - mStartX + 1, mEndY - mStartY + 1);
+    p.strokeRect(mStartX, mStartY, mEndX - mStartX + 1, mEndY - mStartY + 1);
     p.clipToRect(mStartX, mStartY, mEndX - mStartX + 1, mEndY - mStartY + 1);
 }
