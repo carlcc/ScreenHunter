@@ -8,6 +8,7 @@ set(BLEND2D_STATIC ON)
 set(SDL_SHARED OFF)
 add_subdirectory(3rdparty/SDL2-2.0.8)
 add_subdirectory(3rdparty/blend2d)
+add_subdirectory(3rdparty/clip-1.1)
 
 file(GLOB EXAMPLE src/example/*)
 file(GLOB EXAMPLE_PATH src/example)
@@ -95,9 +96,9 @@ file(GLOB APP_SRC
 )
 
 add_executable(ScreenShot ${APP_SRC} ${PLATFORM_SRC_FILES})
-target_include_directories(ScreenShot PRIVATE 3rdparty/include src/app)
-target_link_libraries(ScreenShot blend2d ${PLATFORM_DEPS})
-add_dependencies(ScreenShot blend2d SDL2-static)
+target_include_directories(ScreenShot PRIVATE 3rdparty/include 3rdparty/clip-1.1 src/app)
+target_link_libraries(ScreenShot blend2d clip ${PLATFORM_DEPS})
+add_dependencies(ScreenShot blend2d SDL2-static clip)
 
 if (APPLE)
     add_executable(TestScreenShotMac src/test/screenshot_mac.cpp)

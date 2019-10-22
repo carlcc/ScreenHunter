@@ -84,6 +84,10 @@ void TextPainter::onKey(bool isDown, ScanCode scanCode)
     if (isDown) {
         if (scanCode == ScanCode::SCANCODE_RETURN || scanCode == ScanCode::SCANCODE_RETURN2) {
             mText += "\n";
+        } else if (scanCode == ScanCode::SCANCODE_BACKSPACE) {
+            if (!mText.empty()) {
+                mText.resize(mText.length() - 1);
+            }
         }
     }
 }

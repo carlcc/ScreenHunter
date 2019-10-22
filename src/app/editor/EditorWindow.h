@@ -31,6 +31,8 @@ private:
 
     void setNewPaintTool(const std::shared_ptr<IElementPainter>& newTool);
 
+    void setClipBoard();
+
 private:
     enum EditorState {
         ES_CLIPPING_IDLE,
@@ -47,6 +49,8 @@ private:
     std::shared_ptr<ClippingPainter> mClippingPainter;
     EditorState mEditorState { ES_CLIPPING_IDLE };
     bool mPaintControls { true };
+
+    int64_t mLastTimeDownLeft { 0 };
 
     std::shared_ptr<BLImage> mImageToEdit;
     friend class App;
