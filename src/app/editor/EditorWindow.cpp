@@ -13,8 +13,15 @@
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
 #include "window/Painter.h"
+#include <chrono>
 #include <event/TextInputEvent.h>
 #include <iostream>
+
+inline int64_t steadyTimeMillis()
+{
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+}
 
 EditorWindow::EditorWindow()
 {
@@ -22,12 +29,6 @@ EditorWindow::EditorWindow()
     mControls.push_back(std::make_shared<ColorPicker>());
     mControls.push_back(std::make_shared<ToolPicker>());
     mControls.push_back(std::make_shared<SizePicker>());
-//    auto textBox = std::make_shared<TextBox>();
-//    mControls.push_back(textBox);
-//    textBox->setPosition(100, 100);
-//    textBox->setFontSize(32);
-//    textBox->setTextColor(BLRgba32(0xffff0000));
-//    textBox->setText("Hello, world\nnice to meet you!");
 
     mColorPicker = static_cast<ColorPicker*>(mControls[i++].get()); // NOLINT
     mToolPicker = static_cast<ToolPicker*>(mControls[i++].get()); // NOLINT
@@ -90,6 +91,15 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
                 mEditorState = ES_PAINTING_IDLE;
             }
         } else if (mEditorState == ES_PAINTING_IDLE) {
+            auto now = steadyTimeMillis();
+            if (now - mLastTimeDownLeft < 150) {
+                // done, copy to clipboard
+                setClipBoard();
+                return;
+            } else {
+                mLastTimeDownLeft = now;
+            }
+
             for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
                 auto pControl = *rit;
                 if (pControl->isInnerAbs(mbe.x, mbe.y)) {
@@ -135,12 +145,12 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 {
     mCurrentPainter->onKey(ke.action == KeyboardEvent::ADown, ke.scanCode);
-//    mPaintControls = false;
-//    paint();
-//    BLImageCodec codec;
-//    codec.findByName("BMP");
-//    windowBuffer().writeToFile("a.bmp", codec);
-//    mPaintControls = true;
+    //    mPaintControls = false;
+    //    paint();
+    //    BLImageCodec codec;
+    //    codec.findByName("BMP");
+    //    windowBuffer().writeToFile("a.bmp", codec);
+    //    mPaintControls = true;
 }
 
 void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
@@ -171,7 +181,6 @@ void EditorWindow::onMouseMoveEvent(const MouseMoveEvent& mme)
 
 void EditorWindow::onTextInputEvent(const TextInputEvent& tie)
 {
-//    AppWindow::onTextInputEvent(tie);
     mCurrentPainter->onText(tie.text);
     repaint();
 }
@@ -216,4 +225,39 @@ void EditorWindow::setNewPaintTool(const std::shared_ptr<IElementPainter>& newTo
         mCurrentPainter->endProcess();
     }
     mCurrentPainter = newTool;
+}
+#include <clip.h>
+void EditorWindow::setClipBoard()
+{
+    mPaintControls = false;
+    paint();
+    mPaintControls = true;
+
+    BLImage img(mClippingPainter->width(), mClippingPainter->height(), BL_FORMAT_XRGB32);
+    BLContext ctx(img);
+    BLRectI srcArea(BLRectI(mClippingPainter->x(), mClippingPainter->y(), mClippingPainter->width(), mClippingPainter->height()));
+    ctx.blitImage(BLPointI(0, 0), windowBuffer(), srcArea);
+
+    BLImageData imgData {};
+    img.getData(&imgData);
+    clip::image_spec spec;
+    spec.width = img.width();
+    spec.height = img.height();
+    spec.bytes_per_row = imgData.stride;
+    spec.alpha_mask = 0xFF000000;
+    spec.red_mask = 0x00FF0000;
+    spec.green_mask = 0x0000FF00;
+    spec.blue_mask = 0x000000FF;
+    spec.red_shift = 16;
+    spec.green_shift = 8;
+    spec.blue_shift = 0;
+    spec.alpha_shift = 24;
+    spec.bits_per_pixel = 32;
+    // seems to be only support ABGR32 ?
+    clip::image clipImage(imgData.pixelData, spec);
+    if (clip::set_image(clipImage)) {
+        std::cout << "Suc" << std::endl;
+    } else {
+        std::cout << "Fail" << std::endl;
+    }
 }
