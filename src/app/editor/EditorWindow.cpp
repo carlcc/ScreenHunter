@@ -230,7 +230,9 @@ void EditorWindow::setNewPaintTool(const std::shared_ptr<IElementPainter>& newTo
 void EditorWindow::setClipBoard()
 {
     mPaintControls = false;
+    mClippingPainter->setStrokeBorder(false);
     paint();
+    mClippingPainter->setStrokeBorder(true);
     mPaintControls = true;
 
     BLImage img(mClippingPainter->width(), mClippingPainter->height(), BL_FORMAT_XRGB32);
@@ -245,13 +247,13 @@ void EditorWindow::setClipBoard()
     spec.height = img.height();
     spec.bytes_per_row = imgData.stride;
     spec.alpha_mask = 0xFF000000;
-    spec.red_mask = 0x00FF0000;
-    spec.green_mask = 0x0000FF00;
-    spec.blue_mask = 0x000000FF;
-    spec.red_shift = 16;
-    spec.green_shift = 8;
-    spec.blue_shift = 0;
     spec.alpha_shift = 24;
+    spec.red_mask = 0x00FF0000;
+    spec.red_shift = 16;
+    spec.green_mask = 0x0000FF00;
+    spec.green_shift = 8;
+    spec.blue_mask = 0x000000FF;
+    spec.blue_shift = 0;
     spec.bits_per_pixel = 32;
     // seems to be only support ABGR32 ?
     clip::image clipImage(imgData.pixelData, spec);

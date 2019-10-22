@@ -11,6 +11,12 @@ public:
 
     void paint(Painter& p) override;
 
+    void setStrokeBorder(bool b)
+    {
+        mStrokeBorder = b;
+    }
+
 private:
     std::shared_ptr<BLImage> mImage;
+    bool mStrokeBorder { true };
 };

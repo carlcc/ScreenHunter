@@ -100,7 +100,7 @@
 #include <Windows.h>
 #endif
 
-int64_t steadyTimeMillis()
+inline int64_t steadyTimeMillis()
 {
     using namespace std::chrono;
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
