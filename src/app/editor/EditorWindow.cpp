@@ -255,7 +255,22 @@ void EditorWindow::setClipBoard()
     spec.blue_mask = 0x000000FF;
     spec.blue_shift = 0;
     spec.bits_per_pixel = 32;
-    // seems to be only support ABGR32 ?
+
+#ifdef SCREEN_HUNTER_MACOS
+    {
+        // MACOS cannot display correctly
+        struct RGBA {
+            uint8_t r, g, b, a;
+        };
+        for (int i = 0; i < img.height(); ++i) {
+            auto* rowPtr = (RGBA*)((uint8_t*)imgData.pixelData + i * imgData.stride);
+            for (int j = 0; j < img.width(); ++j) {
+                std::swap(rowPtr[j].r, rowPtr[j].b);
+            }
+        }
+    }
+#endif
+
     clip::image clipImage(imgData.pixelData, spec);
     if (clip::set_image(clipImage)) {
         std::cout << "Suc" << std::endl;
