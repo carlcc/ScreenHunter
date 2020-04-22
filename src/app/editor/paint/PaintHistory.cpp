@@ -30,13 +30,18 @@ bool PaintHistory::redo()
 void PaintHistory::push(const std::shared_ptr<PaintStep>& step)
 {
     mHistorySize += 1;
-    mHistory.resize(mHistorySize);
-    mHistory[mHistorySize - 1] = step;
+    if (mHistory.size() >= mHistorySize) {
+        if (mHistory.size() > mHistorySize) {
+            mHistory.resize(mHistorySize);
+        }
+        mHistory[mHistorySize - 1] = step;
+    } else {
+        mHistory.push_back(step);
+    }
 }
 
 void PaintHistory::paint(Painter& painter)
 {
-    auto it = mHistory.begin();
     for (size_t i = 0; i < mHistorySize; ++i) {
         mHistory[i]->paint(painter);
     }

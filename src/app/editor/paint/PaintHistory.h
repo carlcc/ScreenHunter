@@ -18,7 +18,8 @@ public:
 
     void paint(Painter& painter);
 
-    void clear() {
+    void clear()
+    {
         mHistory.clear();
         mHistorySize = 0;
     }

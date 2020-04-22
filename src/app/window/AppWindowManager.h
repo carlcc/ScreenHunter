@@ -9,7 +9,7 @@ public:
     static AppWindowManager& get();
 
     template <class WindowClass>
-    std::shared_ptr<WindowClass> createWindow(const std::string& title,int x, int y, int w, int h)
+    std::shared_ptr<WindowClass> createWindow(const std::string& title, int x, int y, int w, int h)
     {
         auto* pw = new WindowClass;
         auto win = registerWindow(pw, title, x, y, w, h);

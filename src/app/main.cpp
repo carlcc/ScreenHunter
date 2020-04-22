@@ -90,12 +90,14 @@
 //    return 0;
 //}
 
+#include "../../3rdparty/SDL2-2.0.8/include/SDL_syswm.h"
 #include "editor/EditorWindow.h"
 #include "screen/DisplayInfo.h"
 #include "window/App.h"
 #include "window/AppWindowManager.h"
 #include <chrono>
 #include <iostream>
+#include <memory>
 #ifdef SCREEN_HUNTER_WIN32
 #include <Windows.h>
 #endif

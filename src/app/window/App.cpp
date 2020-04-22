@@ -10,6 +10,16 @@
 #include <iostream>
 #include <map>
 
+static App* gAppInstance { nullptr };
+void setAppInstance(App* app)
+{
+    if (gAppInstance != nullptr && app != nullptr) {
+        std::cerr << "Only one app instance is allowd!" << std::endl;
+        abort();
+    }
+    gAppInstance = app;
+}
+
 App::App(int argc, char** argv)
     : mArgc(argc)
     , mArgv(argv)
@@ -17,6 +27,17 @@ App::App(int argc, char** argv)
     , mInitialized(false)
 {
     mInitialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) == 0;
+    setAppInstance(this);
+}
+
+App::~App()
+{
+    setAppInstance(nullptr);
+}
+
+App* App::get()
+{
+    return gAppInstance;
 }
 
 int App::exec()
@@ -46,7 +67,7 @@ void App::handleEvents()
         ++count;
         switch (event.type) {
         case SDL_QUIT:
-            mIsRunning = false;
+            stop();
             break;
         case SDL_WINDOWEVENT: {
             auto& e = event.window;
@@ -102,10 +123,6 @@ void App::handleEvents()
         case SDL_KEYDOWN:
         case SDL_KEYUP: {
             auto& e = event.key;
-            if (e.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                mIsRunning = false;
-                break;
-            }
             auto* w = SDL_GetWindowFromID(e.windowID);
             if (w == nullptr) {
                 break;
@@ -135,7 +152,7 @@ void App::handleEvents()
             break;
         }
         default:
-                        std::cout << "Unhandled event " << event.type << std::endl;
+            //                        std::cout << "Unhandled event " << event.type << std::endl;
             break;
             // TODO
         }

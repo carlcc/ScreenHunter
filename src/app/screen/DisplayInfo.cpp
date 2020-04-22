@@ -12,7 +12,6 @@
 #include "screen/win32/DisplayInfoImpl.h"
 #endif
 
-
 DisplayInfo::~DisplayInfo()
 {
     delete mImpl;
@@ -46,4 +45,3 @@ std::vector<std::shared_ptr<DisplayInfo>> DisplayInfo::getDisplayInfos()
     }
     return result;
 }
-

@@ -28,7 +28,6 @@ public:
     static std::vector<std::shared_ptr<DisplayInfo>> getDisplayInfos();
 
 private:
-
     class Impl;
     Impl* mImpl;
 };

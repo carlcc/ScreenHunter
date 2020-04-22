@@ -13,4 +13,3 @@ public:
     DisplayBounds bounds;
     Window screen;
 };
-

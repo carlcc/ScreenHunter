@@ -5,8 +5,13 @@
 class App {
 public:
     App(int argc, char** argv);
+    ~App();
 
     int exec();
+
+    void stop() { mIsRunning = false; }
+
+    static App* get();
 
 private:
     void handleEvents();

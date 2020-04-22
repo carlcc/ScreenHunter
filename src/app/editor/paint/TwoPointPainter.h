@@ -7,17 +7,21 @@ public:
     void onEnd(int x, int y) override;
     void onDragging(int x, int y) override;
 
-    int x() const {
+    int x() const
+    {
         return mStartX < mEndX ? mStartX : mEndX;
     }
-    int y() const {
+    int y() const
+    {
         return mStartY < mEndY ? mStartY : mEndY;
     }
-    int width() const {
+    int width() const
+    {
         return mStartX < mEndX ? mEndX - mStartX + 1 : mStartX - mEndX + 1;
     }
 
-    int height() const {
+    int height() const
+    {
         return mStartY < mEndY ? mEndY - mStartY + 1 : mStartY - mEndY + 1;
     }
 

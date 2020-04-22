@@ -1,5 +1,9 @@
 #include "window/AppWindowImpl.h"
+#include <SDL2/SDL_syswm.h>
 #include <iostream>
+#ifdef SCREEN_HUNTER_MACOS
+#include "mac/ConfigureWindow.h"
+#endif
 
 AppWindow::Impl::Impl()
     : mSDLWindow(nullptr)
@@ -14,8 +18,9 @@ AppWindow::Impl::~Impl()
 
 bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWindow* _this)
 {
-    auto* window = SDL_CreateWindow(title, x, y, w, h, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_ALWAYS_ON_TOP);
-//    auto* window = SDL_CreateWindow(title, x, y, 640, 480, 0);
+    int windowFlags = SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_ALLOW_HIGHDPI;
+    auto* window = SDL_CreateWindow(title, x, y, w, h, windowFlags);
+
     if (window == nullptr) {
         return false;
     }
@@ -24,6 +29,10 @@ bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWin
     mSDLWindow = std::shared_ptr<SDL_Window>(window, [](auto* p) {
         SDL_DestroyWindow(p);
     });
+
+#ifdef SCREEN_HUNTER_MACOS
+    ConfigureNativeWindow(window);
+#endif
 
     auto* renderer = SDL_CreateRenderer(window, -1, 0);
     if (nullptr == renderer)
@@ -51,7 +60,7 @@ bool AppWindow::Impl::init(const char* title, int x, int y, int w, int h, AppWin
 
     SDL_FreeSurface(pTmpSurface);
 
-//    auto* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STATIC, mWidth, mHeight);
+    //    auto* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STATIC, mWidth, mHeight);
 
     mTexture = std::shared_ptr<SDL_Texture>(texture, [](auto* t) {
         SDL_DestroyTexture(t);

@@ -3,6 +3,7 @@
 //
 
 #include "editor/EditorWindow.h"
+#include "../window/App.h"
 #include "editor/ctrl/ColorPicker.h"
 #include "editor/ctrl/SizePicker.h"
 #include "editor/ctrl/TextBox.h"
@@ -13,6 +14,7 @@
 #include "event/MouseButtonEvent.h"
 #include "event/MouseMoveEvent.h"
 #include "window/Painter.h"
+#include <SDL2/SDL.h>
 #include <chrono>
 #include <event/TextInputEvent.h>
 #include <iostream>
@@ -92,12 +94,14 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
             }
         } else if (mEditorState == ES_PAINTING_IDLE) {
             auto now = steadyTimeMillis();
-            if (now - mLastTimeDownLeft < 150) {
-                // done, copy to clipboard
-                setClipBoard();
-                return;
-            } else {
-                mLastTimeDownLeft = now;
+            if (mbe.action == MouseButtonEvent::ADown) {
+                if (now - mLastTimeDownLeft < 150) {
+                    // done, copy to clipboard
+                    setClipBoard();
+                    return;
+                } else {
+                    mLastTimeDownLeft = now;
+                }
             }
 
             for (auto rit = mControls.rbegin(); rit != mControls.rend(); ++rit) {
@@ -130,8 +134,14 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
     } else if (mbe.button == MouseButtonEvent::BButtonRight) {
         if (mbe.action == MouseButtonEvent::AUp) {
             if (mEditorState == ES_CLIPPING_IDLE) {
-                // TODO gracefully exit
-                exit(0);
+                if (mPaintHistory.effectiveSize() > 0) {
+                    mPaintHistory.clear();
+                    mEditorState = ES_CLIPPING_IDLE;
+                    repaint();
+                } else {
+                    App::get()->stop();
+                }
+                return;
             } else {
                 mEditorState = ES_CLIPPING_IDLE;
                 mPaintHistory.clear();
@@ -144,6 +154,48 @@ void EditorWindow::onMouseButtonEvent(const MouseButtonEvent& mbe)
 
 void EditorWindow::onKeyboardEvent(const KeyboardEvent& ke)
 {
+    if (ke.action == KeyboardEvent::ADown) {
+        if (ke.scanCode == ScanCode::SCANCODE_ESCAPE) {
+            if (mPaintHistory.effectiveSize() > 0) {
+                mPaintHistory.clear();
+                mEditorState = ES_CLIPPING_IDLE;
+                repaint();
+            } else {
+                App::get()->stop();
+            }
+            return;
+        }
+
+        auto keyMod = SDL_GetModState();
+#ifdef SCREEN_HUNTER_MACOS
+        bool isCtrlPressed = keyMod & (KMOD_GUI | KMOD_CTRL);
+#else
+        bool isCtrlPressed = keyMod & KMOD_CTRL;
+#endif
+        if (isCtrlPressed) {
+            if (ke.scanCode == ScanCode::SCANCODE_Z) {
+                bool isShiftPressed = keyMod & KMOD_SHIFT;
+                if (isShiftPressed) {
+                    mPaintHistory.redo();
+                } else {
+                    mPaintHistory.undo();
+                    if (mPaintHistory.effectiveSize() == 0) {
+                        mEditorState = ES_CLIPPING_IDLE;
+                    }
+                }
+                repaint();
+                std::cout << "history size: " << mPaintHistory.effectiveSize() << std::endl;
+                return;
+            }
+            if (ke.scanCode == ScanCode::SCANCODE_Y) {
+                mPaintHistory.redo();
+                repaint();
+                std::cout << "history size: " << mPaintHistory.effectiveSize() << std::endl;
+                return;
+            }
+        }
+    }
+
     mCurrentPainter->onKey(ke.action == KeyboardEvent::ADown, ke.scanCode);
     //    mPaintControls = false;
     //    paint();
@@ -277,4 +329,5 @@ void EditorWindow::setClipBoard()
     } else {
         std::cout << "Fail" << std::endl;
     }
+    App::get()->stop();
 }

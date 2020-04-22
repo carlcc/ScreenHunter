@@ -10,17 +10,17 @@ add_subdirectory(3rdparty/SDL2-2.0.8)
 add_subdirectory(3rdparty/blend2d)
 add_subdirectory(3rdparty/clip-1.1)
 
-file(GLOB EXAMPLE src/example/*)
-file(GLOB EXAMPLE_PATH src/example)
-
-foreach (proj ${EXAMPLE})
-    file(GLOB_RECURSE proj_src ${proj}/*)
-    string(REPLACE "${EXAMPLE_PATH}/" "" out_name ${proj})
-    message(${out_name})
-    add_executable(${out_name} ${proj_src} )
-    target_include_directories(${out_name} PRIVATE 3rdparty/include)
-    target_link_libraries(${out_name} blend2d)
-endforeach (proj)
+#file(GLOB EXAMPLE src/example/*)
+#file(GLOB EXAMPLE_PATH src/example)
+#
+#foreach (proj ${EXAMPLE})
+#    file(GLOB_RECURSE proj_src ${proj}/*)
+#    string(REPLACE "${EXAMPLE_PATH}/" "" out_name ${proj})
+#    message(${out_name})
+#    add_executable(${out_name} ${proj_src} )
+#    target_include_directories(${out_name} PRIVATE 3rdparty/include)
+#    target_link_libraries(${out_name} blend2d)
+#endforeach (proj)
 
 if (WIN32)
     set(
@@ -68,7 +68,7 @@ elseif(APPLE)
             iconv
     )
     add_definitions("-DSCREEN_HUNTER_MACOS")
-    file(GLOB PLATFORM_SRC_FILES src/app/screen/mac/*)
+    file(GLOB PLATFORM_SRC_FILES src/app/screen/mac/* src/app/window/mac/*)
 elseif(UNIX)
     set(
             PLATFORM_DEPS

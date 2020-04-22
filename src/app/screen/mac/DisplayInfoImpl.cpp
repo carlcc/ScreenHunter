@@ -1,6 +1,7 @@
 #include "DisplayInfoImpl.h"
 #include <ApplicationServices/ApplicationServices.h>
 #include <CoreFoundation/CFData.h>
+#include <CoreGraphics/CoreGraphics.h>
 #include <blend2d.h>
 
 std::vector<DisplayInfo::Impl*> DisplayInfo::Impl::getDisplayInfos()
@@ -36,7 +37,6 @@ std::vector<DisplayInfo::Impl*> DisplayInfo::Impl::getDisplayInfos()
 std::shared_ptr<BLImage> DisplayInfo::Impl::getScreenShot()
 {
     auto cgImage = CGDisplayCreateImage(id);
-
     CFDataRef cgDataRef = CGDataProviderCopyData(CGImageGetDataProvider(cgImage));
     auto cgDataLen = CFDataGetLength(cgDataRef);
     auto* cgData = new uint8_t[cgDataLen];
